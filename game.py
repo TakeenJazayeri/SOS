@@ -43,9 +43,12 @@ def start():
         else:
             for i in record:
                 if i[0] == user and i[1] == pas:
-                    messagebox.showinfo(message='You are signed in')
+                    startWindow.destroy()
+                    dashboard(i)
                     x = False
         if x:
+            entry1.delete(0, len(entry1.get()))
+            entry2.delete(0, len(entry2.get()))
             messagebox.showinfo(message='Username or password is not correct! Please try again.')
 
     signinB = tk.Button(master=startWindow, text='Sign in', width=12, command=signIn)
@@ -57,5 +60,40 @@ def start():
 
 def signUp():
     pass
+
+def dashboard(info):
+    dashboardWindow = tk.Tk()
+    dashboardWindow.geometry('400x450')
+    dashboardWindow.resizable(0, 0)
+
+    box = tk.LabelFrame(master=dashboardWindow, font=('arial', 15), text='User information')
+    content = tk.Label(box, font=('arial', 12), text=f'Username: {info[0]}\nFirst name: {info[2]}\nLast name: {info[3]}\nNumber of games: {info[4]}\nNumber of wins: {info[5]}')
+    content.pack()
+    box.pack(fill=tk.X)
+
+    def signOut():
+        pass
+
+    def exitD():
+        pass
+
+    tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
+    tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
+    tk.Button(master=dashboardWindow, text='Change password', height=2, width=15, command=passChange).place(x=200, y=200)
+    tk.Button(master=dashboardWindow, text='Exit', height=2, width=15, command=exitD).place(x=85, y=250)
+    tk.Button(master=dashboardWindow, text='Sign Out', height=2, width=15, command=signOut).place(x=200, y=250)
+
+    dashboardWindow.mainloop()
+
+def passChange():
+    pass
+
+def secondSignIn():
+    pass
+
+def infoEdit():
+    pass
+
+
 
 start()
