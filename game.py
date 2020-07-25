@@ -50,15 +50,77 @@ def start():
             entry2.delete(0, len(entry2.get()))
             messagebox.showinfo(message='Username or password is not correct! Please try again.')
 
+    def signUp():
+        startWindow.destroy()
+
+        signUpWindow = tk.Tk()
+        signUpWindow.geometry('310x310')
+        signUpWindow.resizable(0, 0)
+
+        frame = tk.Frame(master=signUpWindow)
+        tk.Label(master=frame, text='Username: ').grid(row=0, column=0, sticky='n')
+        entryU = tk.Entry(master=frame, width=30)
+        entryU.grid(row=0, column=1, sticky='n')
+        tk.Label(master=frame, text='First name: ').grid(row=1, column=0, sticky='n')
+        entryF = tk.Entry(master=frame, width=30)
+        entryF.grid(row=1, column=1, sticky='n')
+        tk.Label(master=frame, text='Last name: ').grid(row=2, column=0, sticky='n')
+        entryL = tk.Entry(master=frame, width=30)
+        entryL.grid(row=2, column=1, sticky='n')
+        tk.Label(master=frame, text='Password: ').grid(row=3, column=0, sticky='n')
+        entryP = tk.Entry(master=frame, width=30)
+        entryP.grid(row=3, column=1, sticky='n')
+        tk.Label(master=frame, text='Repeat password: ').grid(row=4, column=0, sticky='n')
+        entryR = tk.Entry(master=frame, width=30)
+        entryR.grid(row=4, column=1, sticky='n')
+        frame.place(x= 10, y=100)
+
+        def enterInfo():
+            exist = False
+            for i in record:
+                if i[0] == entryU.get():
+                    exist = True
+            if exist or entryU.get() == 'admin':
+                entryU.delete(0, len(entryU.get()))
+                messagebox.showerror(title='ERROR', message='There is a user with same user name!')
+            elif not entryP.get() == entryR.get():
+                entryP.delete(0, len(entryP.get()))
+                entryR.delete(0, len(entryR.get()))
+                messagebox.showerror(title='ERROR', message='Repeated password is not correct!')
+            else:
+                try:
+                    sqliteConnection = sqlite3.connect('User_Info.db')
+                    cursor = sqliteConnection.cursor()
+
+                    query = """INSERT INTO user_info (user, pass, fName, lName, gameNum, winNum) VALUES (?, ?, ?, ?, ?, ?)"""
+                    data = (str(entryU.get()), str(entryP.get()), str(entryF.get()), str(entryL.get()), 0, 0)
+                    cursor.execute(query, data)
+                    sqliteConnection.commit()
+
+                    selectQuery = "SELECT * FROM user_info"
+                    cursor.execute(selectQuery)
+                    newRecord = cursor.fetchall()
+                    info = newRecord[len(newRecord)-1]
+
+                    cursor.close()
+                    signUpWindow.destroy()
+                    dashboard(info)
+                finally:
+                    if(sqliteConnection):
+                        sqliteConnection.close()
+                
+
+
+        tk.Button(master=signUpWindow, text='confirm', width=12, command=enterInfo).place(x=110, y=225)
+
+        signUpWindow.mainloop()
+
     signinB = tk.Button(master=startWindow, text='Sign in', width=12, command=signIn)
     signinB.place(x=100, y=150)
     signupB = tk.Button(master=startWindow, text='Sign up', width=12, command=signUp)
     signupB.place(x=100, y=180)
     
     startWindow.mainloop()
-
-def signUp():
-    pass
 
 def dashboard(info):
     dashboardWindow = tk.Tk()
