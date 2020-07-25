@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import messagebox
 
 def start():
-
     try:
         sqliteConnection = sqlite3.connect('User_Info.db')
         cursor = sqliteConnection.cursor()
@@ -25,10 +24,10 @@ def start():
     startWindow.resizable(0, 0)
 
     frame = tk.Frame(master=startWindow)
-    label1 = tk.Label(master=frame, text='Username: ').grid(row=0, column=0, sticky='n')
+    tk.Label(master=frame, text='Username: ').grid(row=0, column=0, sticky='n')
     entry1 = tk.Entry(master=frame, width=30)
     entry1.grid(row=0, column=1, sticky='n')
-    label2 = tk.Label(master=frame, text='Password: ').grid(row=1, column=0, sticky='n')
+    tk.Label(master=frame, text='Password: ').grid(row=1, column=0, sticky='n')
     entry2 = tk.Entry(master=frame, width=30)
     entry2.grid(row=1, column=1, sticky='n')
     frame.place(x= 20, y=100)
@@ -72,10 +71,24 @@ def dashboard(info):
     box.pack(fill=tk.X)
 
     def signOut():
-        pass
+        answer = messagebox.askyesno(title='', message='Do you want to sign out?')
+        if answer:
+            try:
+                sqliteConnection = sqlite3.connect('User_Info.db')
+                cursor = sqliteConnection.cursor()
+
+                query = """DELETE from user_info where user = ?"""
+                cursor.execute(query, (info[0], ))
+                sqliteConnection.commit()
+                cursor.close()
+                exitD()
+            finally:
+                if(sqliteConnection):
+                    sqliteConnection.close()
 
     def exitD():
-        pass
+        dashboardWindow.destroy()
+        start()
 
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
@@ -93,7 +106,6 @@ def secondSignIn():
 
 def infoEdit():
     pass
-
 
 
 start()
