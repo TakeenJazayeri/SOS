@@ -152,6 +152,51 @@ def dashboard(info):
         dashboardWindow.destroy()
         start()
 
+    def passChange():
+        dashboardWindow.destroy()
+
+        passChangeWindow = tk.Tk()
+        passChangeWindow.geometry('320x320')
+        passChangeWindow.resizable(0, 0)
+
+        frame = tk.Frame(master=passChangeWindow)
+        tk.Label(master=frame, text='Old password: ').grid(row=0, column=0, sticky='n')
+        oldpass = tk.Entry(master=frame, width=25)
+        oldpass.grid(row=0, column=1, sticky='n')
+        tk.Label(master=frame, text='New password: ').grid(row=1, column=0, sticky='n')
+        newpass1 = tk.Entry(master=frame, width=25)
+        newpass1.grid(row=1, column=1, sticky='n')
+        tk.Label(master=frame, text='Repeat new password: ').grid(row=2, column=0, sticky='n')
+        newpass2 = tk.Entry(master=frame, width=25)
+        newpass2.grid(row=2, column=1, sticky='n')
+        frame.place(x= 20, y=100)
+
+        def change():
+            if not oldpass.get() == info[1]:
+                oldpass.delete(0, len(oldpass.get()))
+                messagebox.showerror(title='ERROR', message='Old password is not correct!')
+            elif not newpass1.get() == newpass2.get():
+                newpass1.delete(0, len(newpass1.get()))
+                newpass2.delete(0, len(newpass2.get()))
+                messagebox.showerror(title='ERROR', message='Repeated password is not correct!')
+            else:
+                try:
+                    sqliteConnection = sqlite3.connect('User_Info.db')
+                    cursor = sqliteConnection.cursor()
+                    query = """UPDATE user_info set pass = ? where user = ?"""
+                    data = (str(newpass1.get()), info[0])
+                    cursor.execute(query, data)
+                    sqliteConnection.commit()
+                    cursor.close()
+                    passChangeWindow.destroy()
+                    dashboard(info)
+                finally:
+                    if(sqliteConnection):
+                        sqliteConnection.close()
+        
+        tk.Button(master=passChangeWindow, text='Confirm', width=15, command=change).place(x=100, y=180)
+
+
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
     tk.Button(master=dashboardWindow, text='Change password', height=2, width=15, command=passChange).place(x=200, y=200)
@@ -159,9 +204,6 @@ def dashboard(info):
     tk.Button(master=dashboardWindow, text='Sign Out', height=2, width=15, command=signOut).place(x=200, y=250)
 
     dashboardWindow.mainloop()
-
-def passChange():
-    pass
 
 def secondSignIn():
     pass
