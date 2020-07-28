@@ -244,6 +244,47 @@ def dashboard(info):
 
         infoEditWindow.mainloop()
 
+    def secondSignIn():
+        dashboardWindow.destroy()
+
+        try:
+            sqliteConnection = sqlite3.connect('User_Info.db')
+            cursor = sqliteConnection.cursor()
+            selectQuery = "SELECT * FROM user_info"
+            cursor.execute(selectQuery)
+            record = cursor.fetchall()
+            cursor.close()
+        finally:
+            if(sqliteConnection):
+                sqliteConnection.close()
+        
+        secondSignInWindow = tk.Tk()
+        secondSignInWindow.geometry('300x300')
+        secondSignInWindow.resizable(0, 0)
+
+        frame = tk.Frame(master=secondSignInWindow)
+        tk.Label(master=frame, text='Username: ').grid(row=0, column=0, sticky='n')
+        entry1 = tk.Entry(master=frame, width=30)
+        entry1.grid(row=0, column=1, sticky='n')
+        tk.Label(master=frame, text='Password: ').grid(row=1, column=0, sticky='n')
+        entry2 = tk.Entry(master=frame, width=30)
+        entry2.grid(row=1, column=1, sticky='n')
+        frame.place(x= 20, y=100)
+
+        def checkSecondAccount():
+            x = True
+            for i in record:
+                if i[0] == entry1.get() and i[1] == entry2.get():
+                    play(info, i)
+                    x = False
+            if x:
+                entry1.delete(0, len(entry1.get()))
+                entry2.delete(0, len(entry2.get()))
+                messagebox.showinfo(message='Username or password is not correct! Please try again.')
+
+        tk.Button(master=secondSignInWindow, text='Start game', width=12, command=checkSecondAccount).place(x=100, y=150)
+
+
 
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
@@ -253,8 +294,8 @@ def dashboard(info):
 
     dashboardWindow.mainloop()
 
-def secondSignIn():
-    pass
+def play(a, b):
+    messagebox.showinfo(message=f'Now yow can play: {a[2]} vs {b[2]}')
 
 
 start()
