@@ -196,6 +196,54 @@ def dashboard(info):
         
         tk.Button(master=passChangeWindow, text='Confirm', width=15, command=change).place(x=100, y=180)
 
+    def infoEdit():
+        dashboardWindow.destroy()
+
+        infoEditWindow = tk.Tk()
+        infoEditWindow.geometry('310x310')
+        infoEditWindow.resizable(0, 0)
+
+        frame = tk.Frame(master=infoEditWindow)
+        tk.Label(master=frame, text='New firstname: ').grid(row=0, column=0, sticky='n')
+        fEntry = tk.Entry(master=frame, width=25)
+        fEntry.grid(row=0, column=1, sticky='n')
+        tk.Label(master=frame, text='New lastname: ').grid(row=1, column=0, sticky='n')
+        lEntry = tk.Entry(master=frame, width=25)
+        lEntry.grid(row=1, column=1, sticky='n')
+        frame.place(x= 20, y=100)
+
+        def edit():
+            try:
+                sqliteConnection = sqlite3.connect('User_Info.db')
+                cursor = sqliteConnection.cursor()
+
+                query1 = """UPDATE user_info set fName = ? where user = ?"""
+                data1 = (str(fEntry.get()), info[0])
+                cursor.execute(query1, data1)
+
+                query2 = """UPDATE user_info set lName = ? where user = ?"""
+                data2 = (str(lEntry.get()), info[0])
+                cursor.execute(query2, data2)
+
+                selectQuery = "SELECT * FROM user_info"
+                cursor.execute(selectQuery)
+                record = cursor.fetchall()
+                for i in record:
+                    if i[0] == info[0]:
+                        x = i
+
+                sqliteConnection.commit()
+                cursor.close()
+                infoEditWindow.destroy()
+                dashboard(x)
+            finally:
+                if(sqliteConnection):
+                    sqliteConnection.close()
+        
+        tk.Button(master=infoEditWindow, text='Confirm', width=15, command=edit).place(x=100, y=160)
+
+        infoEditWindow.mainloop()
+
 
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
@@ -206,9 +254,6 @@ def dashboard(info):
     dashboardWindow.mainloop()
 
 def secondSignIn():
-    pass
-
-def infoEdit():
     pass
 
 
