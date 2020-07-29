@@ -37,7 +37,8 @@ def start():
         pas = entry2.get()
         x = True
         if user=='admin' and pas==str(adminPass):
-            messagebox.showinfo(message='You are admin')
+            startWindow.destroy()
+            admin(record)
             x = False
         else:
             for i in record:
@@ -122,7 +123,7 @@ def start():
     
     startWindow.mainloop()
 
-def dashboard(info):
+def dashboard (info):
     dashboardWindow = tk.Tk()
     dashboardWindow.geometry('400x450')
     dashboardWindow.resizable(0, 0)
@@ -284,8 +285,6 @@ def dashboard(info):
 
         tk.Button(master=secondSignInWindow, text='Start game', width=12, command=checkSecondAccount).place(x=100, y=150)
 
-
-
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
     tk.Button(master=dashboardWindow, text='Change password', height=2, width=15, command=passChange).place(x=200, y=200)
@@ -294,7 +293,50 @@ def dashboard(info):
 
     dashboardWindow.mainloop()
 
-def play(a, b):
+def admin (record):
+    def accountManagement(event):
+        selected = event.widget.get(event.widget.curselection()[0])
+        for info in record:
+            if info[0] == selected:
+                break
+        messagebox.showinfo(message=f'This is account of {info[2]} {info[3]}')
+    
+    adminWindow = tk.Tk()
+    adminWindow.geometry('260x400')
+    adminWindow.resizable(0, 0)
+    
+    frame = tk.Frame(adminWindow, height=10)
+    frame.place(x=65, y=40)
+
+    users = tk.Listbox(frame, width=20, height=10)
+    users.pack(side=tk.LEFT)
+    users.bind('<<ListboxSelect>>', accountManagement)
+
+    for i in range(len(record)):
+        users.insert(i, record[i][0])
+
+    scroll = tk.Scrollbar(frame, orient='vertical')
+    scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+    scroll.config(command=users.yview)
+    users.config(yscrollcommand=scroll.set)
+
+    def addUser():
+        pass
+
+    def passChange():
+        pass
+
+    def exitA():
+        pass
+
+    tk.Button(master=adminWindow, text='Change password', width=15, command=addUser).place(x=70, y=230)
+    tk.Button(master=adminWindow, text='Change password', width=15, command=passChange).place(x=70, y=265)
+    tk.Button(master=adminWindow, text='Change password', width=15, command=exitA).place(x=70, y=300)
+
+    adminWindow.mainloop()
+
+def play (a, b):
     messagebox.showinfo(message=f'Now yow can play: {a[2]} vs {b[2]}')
 
 
