@@ -73,7 +73,7 @@ def dashboard (info):
     box.pack(fill=tk.X)
 
     def signOut():
-        answer = messagebox.askyesno(title='', message='Do you want to sign out?')
+        answer = messagebox.askyesno(title='Signing Out', message='Are you sure?')
         if answer:
             try:
                 sqliteConnection = sqlite3.connect('User_Info.db')
@@ -238,7 +238,94 @@ def admin (record):
         for info in record:
             if info[0] == selected:
                 break
-        messagebox.showinfo(message=f'This is account of {info[2]} {info[3]}')
+
+        adminWindow.destroy()
+        
+        AMWindow = tk.Tk()
+        AMWindow.geometry('350x350')
+        AMWindow.resizable(0, 0)
+
+        box = tk.LabelFrame(master=AMWindow, font=('arial', 15), text='User information')
+        content = tk.Label(box, font=('arial', 12), text=f'Username: {info[0]}\nFirst name: {info[2]}\nLast name: {info[3]}\nNumber of games: {info[4]}\nNumber of wins: {info[5]}')
+        content.pack()
+        box.pack(fill=tk.X)
+
+        def editAccount():
+            AMWindow.destroy()
+
+            editAccountWindow = tk.Tk()
+            editAccountWindow.geometry('310x310')
+            editAccountWindow.resizable(0, 0)
+
+            frame = tk.Frame(master=editAccountWindow)
+            tk.Label(master=frame, text='New firstname: ').grid(row=0, column=0, sticky='n')
+            fEntry = tk.Entry(master=frame, width=25)
+            fEntry.grid(row=0, column=1, sticky='n')
+            tk.Label(master=frame, text='New lastname: ').grid(row=1, column=0, sticky='n')
+            lEntry = tk.Entry(master=frame, width=25)
+            lEntry.grid(row=1, column=1, sticky='n')
+            frame.place(x= 20, y=100)
+
+            def edit():
+                try:
+                    sqliteConnection = sqlite3.connect('User_Info.db')
+                    cursor = sqliteConnection.cursor()
+
+                    query1 = """UPDATE user_info set fName = ? where user = ?"""
+                    data1 = (str(fEntry.get()), info[0])
+                    cursor.execute(query1, data1)
+
+                    query2 = """UPDATE user_info set lName = ? where user = ?"""
+                    data2 = (str(lEntry.get()), info[0])
+                    cursor.execute(query2, data2)
+
+                    selectQuery = "SELECT * FROM user_info"
+                    cursor.execute(selectQuery)
+                    record = cursor.fetchall()
+
+                    sqliteConnection.commit()
+                    cursor.close()
+                    editAccountWindow.destroy()
+                    admin(record)
+                finally:
+                    if(sqliteConnection):
+                        sqliteConnection.close()
+            
+            tk.Button(master=editAccountWindow, text='Confirm', width=15, command=edit).place(x=100, y=160)
+
+            editAccountWindow.mainloop()
+
+        def deleteAccount():
+            answer = messagebox.askyesno(title='Signing Out', message='Are you sure?')
+            if answer:
+                try:
+                    sqliteConnection = sqlite3.connect('User_Info.db')
+                    cursor = sqliteConnection.cursor()
+
+                    query = """DELETE from user_info where user = ?"""
+                    cursor.execute(query, (info[0], ))
+                    sqliteConnection.commit()
+
+                    selectQuery = "SELECT * FROM user_info"
+                    cursor.execute(selectQuery)
+                    record = cursor.fetchall()
+
+                    cursor.close()
+                    AMWindow.destroy()
+                    admin(record)
+                finally:
+                    if(sqliteConnection):
+                        sqliteConnection.close()
+
+        def exitAM():
+            AMWindow.destroy()
+            admin(record)
+
+        tk.Button(master=AMWindow, text='Edit account', width=20, command=editAccount).place(x=110, y=160)
+        tk.Button(master=AMWindow, text='Delete account', width=20, command=deleteAccount).place(x=110, y=190)
+        tk.Button(master=AMWindow, text='Exit', width=20, command=exitAM).place(x=110, y=220)
+
+        AMWindow.mainloop()
     
     adminWindow = tk.Tk()
     adminWindow.geometry('260x400')
