@@ -409,9 +409,6 @@ def admin (record):
 
     adminWindow.mainloop()
 
-def play (a, b):
-    messagebox.showinfo(message=f'Now yow can play: {a[2]} vs {b[2]}')
-
 def addUser(isAdmin, record):
     addUserWindow = tk.Tk()
     addUserWindow.geometry('310x310')
@@ -479,4 +476,73 @@ def addUser(isAdmin, record):
 
     addUserWindow.mainloop()
 
-start()
+def play (a, b, n):
+    global turn
+    turn = 0
+    
+    class cell:
+        def __init__ (self, master, x, y):
+            self.frame = tk.Frame(master)
+            self.frame.grid(row=x, column=y, padx=3, pady=3)
+
+            self.label = tk.Label(master=self.frame, text='', width=2)
+            self.label.grid(row=0)
+
+            self.buttonS = tk.Button(master=self.frame, text='S', width=1, command=self.fS)
+            self.buttonS.grid(row=0, column=0)
+            self.buttonO = tk.Button(master=self.frame, text='O', width=1, command=self.fO)
+            self.buttonO.grid(row=0, column=1)
+
+        def fS (self):
+            global turn
+            self.buttonS.grid_remove()
+            self.buttonO.grid_remove()
+            self.label.configure(text='S')
+            turn = 1 - turn
+            showLabel2()
+            
+        def fO (self):
+            global turn
+            self.buttonS.grid_remove()
+            self.buttonO.grid_remove()
+            self.label.configure(text='O')
+            turn = 1 - turn
+            showLabel2()
+
+    def showLabel1():
+        label1.configure(text=f'{a[0]}: {aPoint}\t{b[0]}: {bPoint}')
+
+    def showLabel2():
+        if turn == 0:
+            label2.configure(text=f"{a[0]}'s turn")
+        else:
+            label2.configure(text=f"{b[0]}'s turn")
+
+    w = tk.Tk()
+    w.resizable(0, 0)
+    
+    aPoint, bPoint = 0, 0
+    label1 = tk.Label(master=w, text='', font=('calibre', 13))
+    showLabel1()
+    label1.grid(row = 0, pady=3)
+    mainframe = tk.Frame(w)
+    mainframe.grid(row=2, padx=4, pady=8)
+
+    cells = []
+    for i in range(n):
+        cells.append([])
+    for i in range(n):
+        for j in range(n):
+            cells[i].append(cell(mainframe, i, j))
+    
+    
+    label2 = tk.Label(master=w, text='', font=('calibre', 13))
+    label2.grid(row = 1)
+    showLabel2()
+
+
+    w.mainloop()
+
+
+
+play(['A', 'p', 'A', 'A', 0, 0], ['B', 'p', 'B', 'B', 0, 0], n=10)
