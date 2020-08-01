@@ -477,11 +477,14 @@ def addUser(isAdmin, record):
     addUserWindow.mainloop()
 
 def play (a, b, n):
-    global turn
+    global turn, filledCells
     turn = 0
+    filledCells = 0
     
     class cell:
         def __init__ (self, master, x, y):
+            self.x = x
+            self.y = y
             self.frame = tk.Frame(master)
             self.frame.grid(row=x, column=y, padx=3, pady=3)
 
@@ -498,30 +501,149 @@ def play (a, b, n):
             self.buttonS.grid_remove()
             self.buttonO.grid_remove()
             self.label.configure(text='S')
-            turn = 1 - turn
-            showLabel2()
+            self.label.configure(bg='#3498DB')
+            addedS(self.x, self.y)
             
         def fO (self):
             global turn
             self.buttonS.grid_remove()
             self.buttonO.grid_remove()
             self.label.configure(text='O')
+            self.label.configure(bg='#3498DB')
+            addedO(self.x, self.y)
+        
+        def show (self):
+            return self.label['text']
+        
+        def makeRed (self):
+            self.label.configure(bg='#EC7063')
+
+    def addedS (x, y):
+        global turn, filledCells
+        filledCells += 1
+        isScored = False
+        if x >= 2:
+            if cells[x-1][y].show()=='O' and cells[x-2][y].show()=='S':
+                cells[x][y].makeRed()
+                cells[x-1][y].makeRed()
+                cells[x-2][y].makeRed()
+                isScored = True
+                scores[turn] += 1
+            if y >= 2 and cells[x-1][y-1].show()=='O' and cells[x-2][y-2].show()=='S':
+                cells[x][y].makeRed()
+                cells[x-1][y-1].makeRed()
+                cells[x-2][y-2].makeRed()
+                isScored = True
+                scores[turn] += 1
+            if y <= n-3 and cells[x-1][y+1].show()=='O' and cells[x-2][y+2].show()=='S':
+                cells[x][y].makeRed()
+                cells[x-1][y+1].makeRed()
+                cells[x-2][y+2].makeRed()
+                isScored = True
+                scores[turn] += 1
+        if x <= n-3:
+            if cells[x+1][y].show()=='O' and cells[x+2][y].show()=='S':
+                cells[x][y].makeRed()
+                cells[x+1][y].makeRed()
+                cells[x+2][y].makeRed()
+                isScored = True
+                scores[turn] += 1
+            if y >= 2 and cells[x+1][y-1].show()=='O' and cells[x+2][y-2].show()=='S':
+                cells[x][y].makeRed()
+                cells[x+1][y-1].makeRed()
+                cells[x+2][y-2].makeRed()
+                isScored = True
+                scores[turn] += 1
+            if y <= n-3 and cells[x+1][y+1].show()=='O' and cells[x+2][y+2].show()=='S':
+                cells[x][y].makeRed()
+                cells[x+1][y+1].makeRed()
+                cells[x+2][y+2].makeRed()
+                isScored = True
+                scores[turn] += 1
+        if y >= 2 and cells[x][y-1].show()=='O' and cells[x][y-2].show()=='S':
+            cells[x][y].makeRed()
+            cells[x][y-1].makeRed()
+            cells[x][y-2].makeRed()
+            isScored = True
+            scores[turn] += 1
+        if y <= n-3 and cells[x][y+1].show()=='O' and cells[x][y+2].show()=='S':
+            cells[x][y].makeRed()
+            cells[x][y+1].makeRed()
+            cells[x][y+2].makeRed()
+            isScored = True
+            scores[turn] += 1
+
+        showLabel1()
+        if not isScored:
             turn = 1 - turn
             showLabel2()
-
+        
+        if filledCells == n**2:
+            finishedGame()
+    
+    def addedO (x, y):
+        global turn, filledCells
+        filledCells += 1
+        isScored = False
+        if x >= 1 and x <= n-2 and cells[x-1][y].show()=='S' and cells[x+1][y].show()=='S':
+            cells[x-1][y].makeRed()
+            cells[x][y].makeRed()
+            cells[x+1][y].makeRed()
+            isScored = True
+            scores[turn] += 1
+        if y >= 1 and y <= n-2 and cells[x][y-1].show()=='S' and cells[x][y+1].show()=='S':
+            cells[x][y-1].makeRed()
+            cells[x][y].makeRed()
+            cells[x][y+1].makeRed()
+            isScored = True
+            scores[turn] += 1
+        if x >= 1 and x <= n-2 and y >= 1 and y <= n-2:
+            if cells[x-1][y-1].show()=='S' and cells[x+1][y+1].show()=='S':
+                cells[x-1][y-1].makeRed()
+                cells[x][y].makeRed()
+                cells[x+1][y+1].makeRed()
+                isScored = True
+                scores[turn] += 1
+            if cells[x+1][y-1].show()=='S' and cells[x-1][y+1].show()=='S':
+                cells[x+1][y-1].makeRed()
+                cells[x][y].makeRed()
+                cells[x-1][y+1].makeRed()
+                isScored = True
+                scores[turn] += 1
+        
+        showLabel1()
+        if not isScored:
+            turn = 1- turn
+            showLabel2()
+        
+        if filledCells == n**2:
+            finishedGame()
+    
     def showLabel1():
-        label1.configure(text=f'{a[0]}: {aPoint}\t{b[0]}: {bPoint}')
+        label1.configure(text=f'{a[0]}: {scores[0]}\t{b[0]}: {scores[1]}')
 
     def showLabel2():
         if turn == 0:
             label2.configure(text=f"{a[0]}'s turn")
+            label2.configure(bg='#2ECC71')
         else:
             label2.configure(text=f"{b[0]}'s turn")
+            label2.configure(bg='#9B59B6')
+    
+    def finishedGame():
+        if scores[0] > scores[1]:
+            messagebox.showinfo(title='!!congratulation!!', message=f'{a[0]} won the game!')
+        elif scores[0] < scores[1]:
+            messagebox.showinfo(title='!!congratulation!!', message=f'{b[0]} won the game!')
+        else:
+            messagebox.showinfo(title='!!Draw!!', message='Players have same points!')
+        w.destroy()
+        
 
     w = tk.Tk()
     w.resizable(0, 0)
     
-    aPoint, bPoint = 0, 0
+    scores = [0, 0]
     label1 = tk.Label(master=w, text='', font=('calibre', 13))
     showLabel1()
     label1.grid(row = 0, pady=3)
@@ -536,7 +658,7 @@ def play (a, b, n):
             cells[i].append(cell(mainframe, i, j))
     
     
-    label2 = tk.Label(master=w, text='', font=('calibre', 13))
+    label2 = tk.Label(master=w, text='', font=('calibre', 13), fg='white')
     label2.grid(row = 1)
     showLabel2()
 
@@ -544,5 +666,5 @@ def play (a, b, n):
     w.mainloop()
 
 
-
+#start()
 play(['A', 'p', 'A', 'A', 0, 0], ['B', 'p', 'B', 'B', 0, 0], n=10)
