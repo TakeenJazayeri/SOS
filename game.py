@@ -209,20 +209,33 @@ def dashboard (info):
         tk.Label(master=frame, text='Password: ').grid(row=1, column=0, sticky='n')
         entry2 = tk.Entry(master=frame, width=30)
         entry2.grid(row=1, column=1, sticky='n')
+        tk.Label(master=frame, text='Row nember: ').grid(row=2, column=0, sticky='n')
+        entry3 = tk.Entry(master=frame, width=30)
+        entry3.grid(row=2, column=1, sticky='n')
         frame.place(x= 20, y=100)
 
         def checkSecondAccount():
             x = True
             for i in record:
                 if i[0] == entry1.get() and i[1] == entry2.get():
-                    play(info, i)
+                    try:
+                        n = int(entry3.get())
+                        if n <= 3:
+                            entry3.delete(0, len(entry3.get()))
+                            messagebox.showinfo(title='ERROR', message='Number of rows should be more than 3.')
+                        else:
+                            secondSignInWindow.destroy()
+                            play(info, i, n)
+                    except ValueError:
+                        entry3.delete(0, len(entry3.get()))
+                        messagebox.showinfo(title='ERROR', message='Number of rows should be an intiger number.')
                     x = False
             if x:
                 entry1.delete(0, len(entry1.get()))
                 entry2.delete(0, len(entry2.get()))
                 messagebox.showinfo(message='Username or password is not correct! Please try again.')
 
-        tk.Button(master=secondSignInWindow, text='Start game', width=12, command=checkSecondAccount).place(x=100, y=150)
+        tk.Button(master=secondSignInWindow, text='Start game', width=12, command=checkSecondAccount).place(x=100, y=180)
 
     tk.Button(master=dashboardWindow, text='Start new game', height=3, width=30, command=secondSignIn).place(x=90, y=140)
     tk.Button(master=dashboardWindow, text='Edit information', height=2, width=15, command=infoEdit).place(x=85, y=200)
@@ -633,15 +646,66 @@ def play (a, b, n):
     def finishedGame():
         if scores[0] > scores[1]:
             messagebox.showinfo(title='!!congratulation!!', message=f'{a[0]} won the game!')
+            try:
+                sqliteConnection = sqlite3.connect('User_Info.db')
+                cursor = sqliteConnection.cursor()
+
+                query = """UPDATE user_info set winNum = ? where user = ?"""
+                data = (a[5]+1, a[0])
+                cursor.execute(query, data)
+
+                sqliteConnection.commit()
+                cursor.close()
+            finally:
+                if(sqliteConnection):
+                    sqliteConnection.close()
+
         elif scores[0] < scores[1]:
             messagebox.showinfo(title='!!congratulation!!', message=f'{b[0]} won the game!')
+            try:
+                sqliteConnection = sqlite3.connect('User_Info.db')
+                cursor = sqliteConnection.cursor()
+
+                query = """UPDATE user_info set winNum = ? where user = ?"""
+                data = (b[5]+1, b[0])
+                cursor.execute(query, data)
+                
+                sqliteConnection.commit()
+                cursor.close()
+            finally:
+                if(sqliteConnection):
+                    sqliteConnection.close()
+
         else:
             messagebox.showinfo(title='!!Draw!!', message='Players have same points!')
         w.destroy()
-        
+        start()
+    
+    def exitP():
+        answer = messagebox.askyesno(title='Exit the game', message='Are you sure?')
+        if answer:
+            w.destroy()
+            dashboard(a)
+
 
     w = tk.Tk()
     w.resizable(0, 0)
+
+    try:
+        sqliteConnection = sqlite3.connect('User_Info.db')
+        cursor = sqliteConnection.cursor()
+
+        query = """UPDATE user_info set gameNum = ? where user = ?"""
+        data1 = (a[4]+1, a[0])
+        data2 = (b[4]+1, b[0])
+
+        cursor.execute(query, data1)
+        cursor.execute(query, data2)
+        sqliteConnection.commit()
+        cursor.close()
+    finally:
+        if(sqliteConnection):
+            sqliteConnection.close()
     
     scores = [0, 0]
     label1 = tk.Label(master=w, text='', font=('calibre', 13))
@@ -662,9 +726,11 @@ def play (a, b, n):
     label2.grid(row = 1)
     showLabel2()
 
+    tk.Button(master=w, text='Exit', width=12, height=2, command=exitP).grid(row=3, pady=3)
+
 
     w.mainloop()
 
 
-#start()
-play(['A', 'p', 'A', 'A', 0, 0], ['B', 'p', 'B', 'B', 0, 0], n=10)
+start()
+#play(['A', 'p', 'A', 'A', 0, 0], ['B', 'p', 'B', 'B', 0, 0], n=10)
