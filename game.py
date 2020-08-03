@@ -515,7 +515,7 @@ def play (a, b, n):
             self.buttonO.grid_remove()
             self.label.configure(text='S')
             self.label.configure(bg='#3498DB')
-            addedS(self.x, self.y)
+            added(self.x, self.y, 'S')
             
         def fO (self):
             global turn
@@ -523,7 +523,7 @@ def play (a, b, n):
             self.buttonO.grid_remove()
             self.label.configure(text='O')
             self.label.configure(bg='#3498DB')
-            addedO(self.x, self.y)
+            added(self.x, self.y, 'O')
         
         def show (self):
             return self.label['text']
@@ -531,104 +531,55 @@ def play (a, b, n):
         def makeRed (self):
             self.label.configure(bg='#EC7063')
 
-    def addedS (x, y):
+    def formsSOS (x, y, cellContent):
+        global turn
+        listNeedToBeRed = []
+        if cellContent == 'S':
+            if x >= 2:
+                if cells[x-1][y].show()=='O' and cells[x-2][y].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x-1][y], cells[x-2][y]])
+                if y >= 2 and cells[x-1][y-1].show()=='O' and cells[x-2][y-2].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x-1][y-1], cells[x-2][y-2]])
+                if y <= n-3 and cells[x-1][y+1].show()=='O' and cells[x-2][y+2].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x-1][y+1], cells[x-2][y+2]])
+            if x <= n-3:
+                if cells[x+1][y].show()=='O' and cells[x+2][y].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x+1][y], cells[x+2][y]])
+                if y >= 2 and cells[x+1][y-1].show()=='O' and cells[x+2][y-2].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x+1][y-1], cells[x+2][y-2]])
+                if y <= n-3 and cells[x+1][y+1].show()=='O' and cells[x+2][y+2].show()=='S':
+                    listNeedToBeRed.append([cells[x][y], cells[x+1][y+1], cells[x+2][y+2]])
+            if y >= 2 and cells[x][y-1].show()=='O' and cells[x][y-2].show()=='S':
+                listNeedToBeRed.append([cells[x][y], cells[x][y-1], cells[x][y-2]])
+            if y <= n-3 and cells[x][y+1].show()=='O' and cells[x][y+2].show()=='S':
+                listNeedToBeRed.append([cells[x][y], cells[x][y+1], cells[x][y+2]])
+
+        if cellContent == 'O':
+            if x >= 1 and x <= n-2 and cells[x-1][y].show()=='S' and cells[x+1][y].show()=='S':
+                listNeedToBeRed.append([cells[x-1][y], cells[x][y], cells[x+1][y]])
+            if y >= 1 and y <= n-2 and cells[x][y-1].show()=='S' and cells[x][y+1].show()=='S':
+                listNeedToBeRed.append([cells[x][y-1], cells[x][y], cells[x][y+1]])
+            if x >= 1 and x <= n-2 and y >= 1 and y <= n-2:
+                if cells[x-1][y-1].show()=='S' and cells[x+1][y+1].show()=='S':
+                    listNeedToBeRed.append([cells[x-1][y-1], cells[x][y], cells[x+1][y+1]])
+                if cells[x+1][y-1].show()=='S' and cells[x-1][y+1].show()=='S':
+                    listNeedToBeRed.append([cells[x-1][y+1], cells[x][y], cells[x+1][y-1]])
+
+        return listNeedToBeRed
+
+    def added (x, y, cellContent):
         global turn, filledCells
         filledCells += 1
-        isScored = False
-        if x >= 2:
-            if cells[x-1][y].show()=='O' and cells[x-2][y].show()=='S':
-                cells[x][y].makeRed()
-                cells[x-1][y].makeRed()
-                cells[x-2][y].makeRed()
-                isScored = True
-                scores[turn] += 1
-            if y >= 2 and cells[x-1][y-1].show()=='O' and cells[x-2][y-2].show()=='S':
-                cells[x][y].makeRed()
-                cells[x-1][y-1].makeRed()
-                cells[x-2][y-2].makeRed()
-                isScored = True
-                scores[turn] += 1
-            if y <= n-3 and cells[x-1][y+1].show()=='O' and cells[x-2][y+2].show()=='S':
-                cells[x][y].makeRed()
-                cells[x-1][y+1].makeRed()
-                cells[x-2][y+2].makeRed()
-                isScored = True
-                scores[turn] += 1
-        if x <= n-3:
-            if cells[x+1][y].show()=='O' and cells[x+2][y].show()=='S':
-                cells[x][y].makeRed()
-                cells[x+1][y].makeRed()
-                cells[x+2][y].makeRed()
-                isScored = True
-                scores[turn] += 1
-            if y >= 2 and cells[x+1][y-1].show()=='O' and cells[x+2][y-2].show()=='S':
-                cells[x][y].makeRed()
-                cells[x+1][y-1].makeRed()
-                cells[x+2][y-2].makeRed()
-                isScored = True
-                scores[turn] += 1
-            if y <= n-3 and cells[x+1][y+1].show()=='O' and cells[x+2][y+2].show()=='S':
-                cells[x][y].makeRed()
-                cells[x+1][y+1].makeRed()
-                cells[x+2][y+2].makeRed()
-                isScored = True
-                scores[turn] += 1
-        if y >= 2 and cells[x][y-1].show()=='O' and cells[x][y-2].show()=='S':
-            cells[x][y].makeRed()
-            cells[x][y-1].makeRed()
-            cells[x][y-2].makeRed()
-            isScored = True
-            scores[turn] += 1
-        if y <= n-3 and cells[x][y+1].show()=='O' and cells[x][y+2].show()=='S':
-            cells[x][y].makeRed()
-            cells[x][y+1].makeRed()
-            cells[x][y+2].makeRed()
-            isScored = True
-            scores[turn] += 1
-
+        l = formsSOS(x, y, cellContent)
+        scores[turn] += len(l)
         showLabel1()
-        if not isScored:
+        if l == []:
             turn = 1 - turn
             showLabel2()
-        
-        if filledCells == n**2:
-            finishedGame()
-    
-    def addedO (x, y):
-        global turn, filledCells
-        filledCells += 1
-        isScored = False
-        if x >= 1 and x <= n-2 and cells[x-1][y].show()=='S' and cells[x+1][y].show()=='S':
-            cells[x-1][y].makeRed()
-            cells[x][y].makeRed()
-            cells[x+1][y].makeRed()
-            isScored = True
-            scores[turn] += 1
-        if y >= 1 and y <= n-2 and cells[x][y-1].show()=='S' and cells[x][y+1].show()=='S':
-            cells[x][y-1].makeRed()
-            cells[x][y].makeRed()
-            cells[x][y+1].makeRed()
-            isScored = True
-            scores[turn] += 1
-        if x >= 1 and x <= n-2 and y >= 1 and y <= n-2:
-            if cells[x-1][y-1].show()=='S' and cells[x+1][y+1].show()=='S':
-                cells[x-1][y-1].makeRed()
-                cells[x][y].makeRed()
-                cells[x+1][y+1].makeRed()
-                isScored = True
-                scores[turn] += 1
-            if cells[x+1][y-1].show()=='S' and cells[x-1][y+1].show()=='S':
-                cells[x+1][y-1].makeRed()
-                cells[x][y].makeRed()
-                cells[x-1][y+1].makeRed()
-                isScored = True
-                scores[turn] += 1
-        
-        showLabel1()
-        if not isScored:
-            turn = 1- turn
-            showLabel2()
-        
+        else:
+            for i in l:
+                for j in range(3):
+                    i[j].makeRed()
         if filledCells == n**2:
             finishedGame()
     
@@ -733,4 +684,3 @@ def play (a, b, n):
 
 
 start()
-#play(['A', 'p', 'A', 'A', 0, 0], ['B', 'p', 'B', 'B', 0, 0], n=10)
