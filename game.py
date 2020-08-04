@@ -1,6 +1,7 @@
 import sqlite3
 import tkinter as tk
 from tkinter import messagebox
+import random
 
 def start():
     try:
@@ -18,8 +19,6 @@ def start():
     finally:
         if(sqliteConnection):
             sqliteConnection.close()
-    
-    play(record[0], record[1], 5)
     
     startWindow = tk.Tk()
     startWindow.geometry('300x300')
@@ -493,7 +492,7 @@ def addUser(isAdmin, record):
 
 def play (a, b, n):
     global turn, filledCells
-    turn = 0
+    turn = random.randint(0, 1)
     filledCells = 0
     
     class cell:
@@ -516,7 +515,7 @@ def play (a, b, n):
             self.buttonS.grid_remove()
             self.buttonO.grid_remove()
             self.label.configure(text='S')
-            self.label.configure(bg='#3498DB')
+            self.label.configure(bg='#2ECC71')
             added(self.x, self.y, 'S')
             
         def fO (self):
@@ -532,6 +531,12 @@ def play (a, b, n):
         
         def makeRed (self):
             self.label.configure(bg='#EC7063')
+        
+        def color (self):
+            if turn == 0:
+                self.label.configure(bg='#2ECC71')
+            if turn == 1:
+                self.label.configure(bg='#3498DB')
 
     def formsSOS (x, y, cellContent):
         global turn
@@ -594,7 +599,7 @@ def play (a, b, n):
             label2.configure(bg='#2ECC71')
         else:
             label2.configure(text=f"{b[0]}'s turn")
-            label2.configure(bg='#9B59B6')
+            label2.configure(bg='#3498DB')
     
     def finishedGame():
         if scores[0] > scores[1]:
@@ -667,7 +672,7 @@ def play (a, b, n):
     def guidance1():
         x = int(helpB1['text'][0])
         if x > 0 and turn == 1 and findSOS():
-            helpB0.configure(text=str(x-1) + helpB1['text'][1:])
+            helpB1.configure(text=str(x-1) + helpB1['text'][1:])
         if x > 0 and turn == 0:
             messagebox.showinfo(title='ERROR', message="It's not the player's turn.")
         if x == 0:
@@ -716,7 +721,7 @@ def play (a, b, n):
     frame.grid(row=3, pady=2)
     helpB0 = tk.Button(master=frame, text='3 helps', bg='#2ECC71', width=12, height=2, command=guidance0)
     helpB0.grid(row=0, column=0)
-    helpB1 = tk.Button(master=frame, text='3 helps', bg='#9B59B6', width=12, height=2, command=guidance1)
+    helpB1 = tk.Button(master=frame, text='3 helps', bg='#3498DB', width=12, height=2, command=guidance1)
     helpB1.grid(row=0, column=1)
 
     tk.Button(master=w, text='Exit', width=12, height=2, command=exitP).grid(row=4, pady=3)
