@@ -39,7 +39,7 @@ def start():
         x = True
         if user=='admin' and pas==str(adminPass):
             startWindow.destroy()
-            admin(record)
+            admin(record, adminPass)
             x = False
         else:
             for i in record:
@@ -246,7 +246,7 @@ def dashboard (info):
 
     dashboardWindow.mainloop()
 
-def admin (record):
+def admin (record, adminPass):
     def accountManagement(event):
         selected = event.widget.get(event.widget.curselection()[0])
         for info in record:
@@ -300,7 +300,7 @@ def admin (record):
                     sqliteConnection.commit()
                     cursor.close()
                     editAccountWindow.destroy()
-                    admin(record)
+                    admin(record, adminPass)
                 finally:
                     if(sqliteConnection):
                         sqliteConnection.close()
@@ -326,40 +326,20 @@ def admin (record):
 
                     cursor.close()
                     AMWindow.destroy()
-                    admin(record)
+                    admin(record, adminPass)
                 finally:
                     if(sqliteConnection):
                         sqliteConnection.close()
 
         def exitAM():
             AMWindow.destroy()
-            admin(record)
+            admin(record, adminPass)
 
         tk.Button(master=AMWindow, text='Edit account', width=20, command=editAccount).place(x=110, y=160)
         tk.Button(master=AMWindow, text='Delete account', width=20, command=deleteAccount).place(x=110, y=190)
         tk.Button(master=AMWindow, text='Exit', width=20, command=exitAM).place(x=110, y=220)
 
         AMWindow.mainloop()
-    
-    adminWindow = tk.Tk()
-    adminWindow.geometry('260x400')
-    adminWindow.resizable(0, 0)
-    
-    frame = tk.Frame(adminWindow, height=10)
-    frame.place(x=65, y=40)
-
-    users = tk.Listbox(frame, width=20, height=10)
-    users.pack(side=tk.LEFT)
-    users.bind('<<ListboxSelect>>', accountManagement)
-
-    for i in range(len(record)):
-        users.insert(i, record[i][0])
-
-    scroll = tk.Scrollbar(frame, orient='vertical')
-    scroll.pack(side=tk.RIGHT, fill=tk.Y)
-
-    scroll.config(command=users.yview)
-    users.config(yscrollcommand=scroll.set)
 
     def addUserAdmin():
         adminWindow.destroy()
@@ -395,6 +375,10 @@ def admin (record):
                 if not oldpass.get() == adminPass:
                     oldpass.delete(0, len(oldpass.get()))
                     messagebox.showerror(title='ERROR', message='Old password is not correct!')
+                elif newpass1.get() == '123456':
+                    newpass1.delete(0, len(newpass1.get()))
+                    newpass2.delete(0, len(newpass2.get()))
+                    messagebox.showerror(title='ERROR', message="Password shouldn't be \"123456\"!")
                 elif not newpass1.get() == newpass2.get():
                     newpass1.delete(0, len(newpass1.get()))
                     newpass2.delete(0, len(newpass2.get()))
@@ -405,8 +389,10 @@ def admin (record):
                     cursor.execute(query, data)
                     sqliteConnection.commit()
                     cursor.close()
+                    newpass = str(newpass1.get())
+                    
                     passChangeWindow.destroy()
-                    admin(record)
+                    admin(record, newpass)
             finally:
                 if(sqliteConnection):
                     sqliteConnection.close()
@@ -416,14 +402,38 @@ def admin (record):
     def exitA():
         adminWindow.destroy()
         start()
+    
+    adminWindow = tk.Tk()
+    adminWindow.geometry('260x400')
+    adminWindow.resizable(0, 0)
+
+    frame = tk.Frame(adminWindow, height=10)
+    frame.place(x=65, y=40)
+
+    users = tk.Listbox(frame, width=20, height=10)
+    users.pack(side=tk.LEFT)
+    users.bind('<<ListboxSelect>>', accountManagement)
+
+    for i in range(len(record)):
+        users.insert(i, record[i][0])
+
+    scroll = tk.Scrollbar(frame, orient='vertical')
+    scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+    scroll.config(command=users.yview)
+    users.config(yscrollcommand=scroll.set)
 
     tk.Button(master=adminWindow, text='Add a user', width=15, command=addUserAdmin).place(x=70, y=230)
     tk.Button(master=adminWindow, text='Change password', width=15, command=passChange).place(x=70, y=265)
     tk.Button(master=adminWindow, text='Exit', width=15, command=exitA).place(x=70, y=300)
+    
+    if adminPass == '123456':
+        passChange()
+        messagebox.showinfo(title='MANDATORY PASSWORD CHANGE', message='Admin should change the password at the first entering.')
 
     adminWindow.mainloop()
 
-def addUser(isAdmin, record):
+def addUser (isAdmin, record):
     addUserWindow = tk.Tk()
     addUserWindow.geometry('310x310')
     addUserWindow.resizable(0, 0)
@@ -474,6 +484,10 @@ def addUser(isAdmin, record):
                 cursor.execute(selectQuery)
                 newRecord = cursor.fetchall()
 
+                selectQuery = "SELECT * FROM admin_info"
+                cursor.execute(selectQuery)
+                adminPass = cursor.fetchall()[0][0]
+
                 cursor.close()
                 addUserWindow.destroy()
                 
@@ -481,7 +495,7 @@ def addUser(isAdmin, record):
                     info = newRecord[len(newRecord)-1]
                     dashboard(info)
                 if isAdmin == 1:
-                    admin(newRecord)
+                    admin(newRecord, adminPass)
             finally:
                 if(sqliteConnection):
                     sqliteConnection.close()
