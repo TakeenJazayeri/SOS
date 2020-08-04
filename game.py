@@ -19,6 +19,8 @@ def start():
         if(sqliteConnection):
             sqliteConnection.close()
     
+    play(record[0], record[1], 5)
+    
     startWindow = tk.Tk()
     startWindow.geometry('300x300')
     startWindow.resizable(0, 0)
@@ -637,6 +639,39 @@ def play (a, b, n):
         if answer:
             w.destroy()
             dashboard(a)
+    
+    def findSOS():
+        for i in range(n):
+            for j in range(n):
+                if cells[i][j].show() == '':
+                    I = formsSOS(i, j, 'S')
+                    if not I == []:
+                        messagebox.showinfo(title='HELP', message=f"You can fill the cell in row {i+1} column {j+1} with 'S'.")
+                        return True
+                    I = formsSOS(i, j, 'O')
+                    if not I == []:
+                        messagebox.showinfo(title='HELP', message=f"You can fill the cell in row {i+1} column {j+1} with 'O'.")
+                        return True
+        messagebox.showinfo(title='HELP', message="There is no action leading to 'SOS'")
+        return False
+    
+    def guidance0():
+        x = int(helpB0['text'][0])
+        if x > 0 and turn == 0 and findSOS():
+            helpB0.configure(text=str(x-1) + helpB0['text'][1:])
+        if x > 0 and turn == 1:
+            messagebox.showinfo(title='ERROR', message="It's not the player's turn.")
+        if x == 0:
+            messagebox.showinfo(title='ERROR', message="The player can't use helps.")
+    
+    def guidance1():
+        x = int(helpB1['text'][0])
+        if x > 0 and turn == 1 and findSOS():
+            helpB0.configure(text=str(x-1) + helpB1['text'][1:])
+        if x > 0 and turn == 0:
+            messagebox.showinfo(title='ERROR', message="It's not the player's turn.")
+        if x == 0:
+            messagebox.showinfo(title='ERROR', message="The player can't use helps.")
 
 
     w = tk.Tk()
@@ -677,7 +712,14 @@ def play (a, b, n):
     label2.grid(row = 1)
     showLabel2()
 
-    tk.Button(master=w, text='Exit', width=12, height=2, command=exitP).grid(row=3, pady=3)
+    frame = tk.Frame(w)
+    frame.grid(row=3, pady=2)
+    helpB0 = tk.Button(master=frame, text='3 helps', bg='#2ECC71', width=12, height=2, command=guidance0)
+    helpB0.grid(row=0, column=0)
+    helpB1 = tk.Button(master=frame, text='3 helps', bg='#9B59B6', width=12, height=2, command=guidance1)
+    helpB1.grid(row=0, column=1)
+
+    tk.Button(master=w, text='Exit', width=12, height=2, command=exitP).grid(row=4, pady=3)
 
 
     w.mainloop()
